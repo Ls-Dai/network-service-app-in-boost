@@ -44,9 +44,11 @@ int main(int argc, char **argv) {
             runServer();
         } else {
             std::cout << "Not a valid param." << std::endl;
+            std::cout << "Example: \"./main server\" or \"./main client\"" << std::endl;
         }
     } else {
         std::cout << "Not a valid param." << std::endl;
+        std::cout << "Example: \"./main server\" or \"./main client\"" << std::endl;
     }
     return 0;
 };

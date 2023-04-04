@@ -36,10 +36,9 @@ void Client::run() {
         boost::system::error_code ec;
         std::string msg(1024, '\0');
 
-        logInfo(">> ", "");
-        std::getline(std::cin, msg);
+        msg = input(">> ", "");
 
-        msg = "Client: " + msg;
+        msg = "<< Client: " + msg;
         msg.resize(1024);
 
         std::chrono::system_clock::time_point tp_start = std::chrono::system_clock::now();
@@ -47,14 +46,14 @@ void Client::run() {
         try {
             boost::asio::write(*_ptr_socket, boost::asio::buffer(msg, 1024));
         } catch (boost::wrapexcept<boost::system::system_error> e) {
-            logInfo("Connection Broken. Please connect to other server.");
+            logInfo("[ Error ] Connection Broken. Please connect to other server.");
             connectByInput(false);
         }
 
         try {
             boost::asio::read(*_ptr_socket, boost::asio::buffer(msg, 1024));
         } catch (boost::wrapexcept<boost::system::system_error> e) {
-            logInfo("Connection Broken. Please connect to other server.");
+            logInfo("[ Error ] Connection Broken. Please connect to other server.");
             connectByInput(false);
         }
 
@@ -62,7 +61,7 @@ void Client::run() {
 
         logInfo(msg);
         logInfo(
-            "Roundtrip time for acknowledgment: "
+            "[ Debug ] Roundtrip time for acknowledgment: "
             + std::to_string(
                 std::chrono::duration_cast<std::chrono::nanoseconds>(tp_end - tp_start).count() / MICRO
             ) 
@@ -72,7 +71,7 @@ void Client::run() {
         try {
             boost::asio::read(*_ptr_socket, boost::asio::buffer(msg, 1024));
         } catch (boost::wrapexcept<boost::system::system_error> e) {
-            logInfo("Connection Broken. Please connect to other server.");
+            logInfo("[ Error ] Connection Broken. Please connect to other server.");
             connectByInput(false);
         }
 
@@ -83,16 +82,20 @@ void Client::run() {
 void Client::connectByInput(bool isFirstConnect) {
     if (not isFirstConnect) 
         _ptr_socket->close();
+
     std::string ipAddr = "127.0.0.1";
     std::string port_str = "8080";
-    logInfo("Input IP address (default: 127.0.0.1) >> ", "");
-    std::getline(std::cin, ipAddr);
+
+    ipAddr = input("Input IP address (default: 127.0.0.1) >> ", "");
+
     if (ipAddr.empty())
         ipAddr = "127.0.0.1";
-    logInfo("Input port number (default: 8080) >> ", "");
-    std::getline(std::cin, port_str);
+
+    port_str = input("Input port number (default: 8080) >> ", "");
+
     if (port_str.empty())
         port_str = "8080";
+
     this->connect(ipAddr, std::atoi(port_str.c_str()));
 }
 

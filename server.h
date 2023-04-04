@@ -32,9 +32,10 @@ void Server::setPort(unsigned int port) {
 
 void Server::run(void) {
 start_running:
-    logInfo("Waiting for an incoming client...");
+    logInfo("[ Info ] Waiting for an incoming client...");
     _ptr_acceptor->accept(*_ptr_socket);
-    logInfo("Connection built.");
+    logInfo("[ Info ] Connection built.");
+
     keep_running {
         boost::system::error_code ec;
         std::string msg(1024, '\0');
@@ -48,7 +49,7 @@ start_running:
 
         logInfo(msg);
 
-        msg = "Message Received.";
+        msg = "[ Info ] Message Received.";
         msg.resize(1024);
 
         try {
@@ -58,10 +59,9 @@ start_running:
             goto start_running;
         }
 
-        logInfo(">> ", "");
-        std::getline(std::cin, msg);
+        msg = msg = input(">> ", "");
 
-        msg = "Server: " + msg;
+        msg = "<< Server: " + msg;
         msg.resize(1024);
 
         try {
@@ -74,7 +74,7 @@ start_running:
 }
 
 void Server::reset(void) {
-    logInfo("Connection broken, reset the server...");
+    logInfo("[ Error ] Connection broken, reset the server...");
     _ptr_socket->close();
 }
 
