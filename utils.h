@@ -16,4 +16,7 @@ inline void logInfo(std::string const& s, std::string endline="\n") {
 //     std::cout << s << endline;
 // }
 
+const double NANO = 1000000000.0;
+const double MICRO = 1000000.0;
+
 #endif

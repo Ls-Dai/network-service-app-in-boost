@@ -48,6 +48,16 @@ start_running:
 
         logInfo(msg);
 
+        msg = "Message Received.";
+        msg.resize(1024);
+
+        try {
+            boost::asio::write(*_ptr_socket, boost::asio::buffer(msg, 1024));
+        } catch (boost::wrapexcept<boost::system::system_error> e) {
+            reset();
+            goto start_running;
+        }
+
         logInfo(">> ", "");
         std::getline(std::cin, msg);
 

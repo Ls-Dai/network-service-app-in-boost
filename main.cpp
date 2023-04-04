@@ -7,16 +7,13 @@
 #include "server.h"
 #include "utils.h"
 
-using namespace std;
-
 enum class Mode {
     null,
     client,
     server,
 };
 
-
-Mode parseMode(string const& s) {
+Mode parseMode(std::string const& s) {
     if (s == "client")
         return Mode::client;
     if (s == "server")
@@ -46,10 +43,10 @@ int main(int argc, char **argv) {
         } else if (mode == Mode::server) {
             runServer();
         } else {
-            cout << "Not a valid param." << endl;
+            std::cout << "Not a valid param." << std::endl;
         }
     } else {
-        cout << "Not a valid param." << endl;
+        std::cout << "Not a valid param." << std::endl;
     }
     return 0;
 };

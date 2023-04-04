@@ -19,7 +19,6 @@ public:
     void connectByInput(bool isFirstConnect=true);
     void connect(std::string const& host, unsigned int port);
     void run();
-    void tryReconnect();
 };
 
 Client::Client(void) {
@@ -42,6 +41,8 @@ void Client::run() {
 
         msg = "Client: " + msg;
         msg.resize(1024);
+
+        std::chrono::system_clock::time_point tp_start = std::chrono::system_clock::now();
         
         try {
             boost::asio::write(*_ptr_socket, boost::asio::buffer(msg, 1024));
@@ -49,6 +50,24 @@ void Client::run() {
             logInfo("Connection Broken. Please connect to other server.");
             connectByInput(false);
         }
+
+        try {
+            boost::asio::read(*_ptr_socket, boost::asio::buffer(msg, 1024));
+        } catch (boost::wrapexcept<boost::system::system_error> e) {
+            logInfo("Connection Broken. Please connect to other server.");
+            connectByInput(false);
+        }
+
+        std::chrono::system_clock::time_point tp_end = std::chrono::system_clock::now();
+
+        logInfo(msg);
+        logInfo(
+            "Roundtrip time for acknowledgment: "
+            + std::to_string(
+                std::chrono::duration_cast<std::chrono::nanoseconds>(tp_end - tp_start).count() / MICRO
+            ) 
+            + "ms"
+        );
 
         try {
             boost::asio::read(*_ptr_socket, boost::asio::buffer(msg, 1024));
@@ -75,10 +94,6 @@ void Client::connectByInput(bool isFirstConnect) {
     if (port_str.empty())
         port_str = "8080";
     this->connect(ipAddr, std::atoi(port_str.c_str()));
-}
-
-void Client::tryReconnect() {
-
 }
 
 #endif
