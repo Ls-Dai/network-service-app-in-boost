@@ -6,6 +6,7 @@
 #include <bits/stdc++.h>
 #endif
 
+#include <optional>
 #include <boost/asio.hpp>
 #include "utils.h"
 
@@ -20,6 +21,8 @@ public:
     void setPort(unsigned int port);
     void run(void);
     void reset(void);
+    int send(std::string msg);
+    std::optional<std::string> receive(void);
 };
 
 Server::Server(void) {
@@ -37,15 +40,13 @@ start_running:
     logInfo("[ Info ] Connection built.");
 
     keep_running {
-        boost::system::error_code ec;
-        std::string msg(1024, '\0');
-
-        try {
-            boost::asio::read(*_ptr_socket, boost::asio::buffer(msg, 1024));
-        } catch (boost::wrapexcept<boost::system::system_error> e) {
+        std::string msg;
+        std::optional<std::string> msg_optional = receive();
+        if (not msg_optional.has_value()) {
             reset();
             goto start_running;
         }
+        msg = msg_optional.value();
 
         logInfo(msg);
 
@@ -62,15 +63,56 @@ start_running:
         msg = msg = input(">> ", "");
 
         msg = "<< Server: " + msg;
-        msg.resize(1024);
-
-        try {
-            boost::asio::write(*_ptr_socket, boost::asio::buffer(msg, 1024));
-        } catch (boost::wrapexcept<boost::system::system_error> e) {
+        
+        if (send(msg)) {
             reset();
             goto start_running;
         }
     }
+}
+
+int Server::send(std::string msg) {
+    std::size_t length = msg.size();
+    char length_bytes[8] = {};
+    size2chars(length, length_bytes);
+
+    try {
+        boost::asio::write(*_ptr_socket, boost::asio::buffer(length_bytes, 8));
+    } catch (boost::wrapexcept<boost::system::system_error> e) {
+        return -1;
+    }
+
+    try {
+        boost::asio::write(*_ptr_socket, boost::asio::buffer(msg));
+    } catch (boost::wrapexcept<boost::system::system_error> e) {
+        return -1;
+    }
+
+    return 0;
+}
+
+std::optional<std::string> Server::receive(void) {
+    std::string msg{};
+    char length_bytes[8] = {};
+    std::size_t length = 0;
+
+    try {
+        boost::asio::read(*_ptr_socket, boost::asio::buffer(length_bytes, 8));
+    } catch (boost::wrapexcept<boost::system::system_error> e) {
+        return std::nullopt;
+    }
+
+    length = chars2size(length_bytes);
+
+    msg.resize(length);
+    
+    try {
+        boost::asio::read(*_ptr_socket, boost::asio::buffer(msg, msg.size()));
+    } catch (boost::wrapexcept<boost::system::system_error> e) {
+        return std::nullopt;
+    }
+
+    return std::optional<std::string>(msg);
 }
 
 void Server::reset(void) {

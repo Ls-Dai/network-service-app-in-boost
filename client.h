@@ -6,6 +6,7 @@
 #include <bits/stdc++.h>
 #endif
 
+#include <optional>
 #include <boost/asio.hpp>
 #include "utils.h"
 
@@ -19,6 +20,8 @@ public:
     void connectByInput(bool isFirstConnect=true);
     void connect(std::string const& host, unsigned int port);
     void run();
+    int send(std::string msg);
+    std::optional<std::string> receive(void);
 };
 
 Client::Client(void) {
@@ -43,9 +46,7 @@ void Client::run() {
 
         std::chrono::system_clock::time_point tp_start = std::chrono::system_clock::now();
         
-        try {
-            boost::asio::write(*_ptr_socket, boost::asio::buffer(msg, 1024));
-        } catch (boost::wrapexcept<boost::system::system_error> e) {
+        if (send(msg)) {
             logInfo("[ Error ] Connection Broken. Please connect to other server.");
             connectByInput(false);
         }
@@ -68,15 +69,59 @@ void Client::run() {
             + "ms"
         );
 
-        try {
-            boost::asio::read(*_ptr_socket, boost::asio::buffer(msg, 1024));
-        } catch (boost::wrapexcept<boost::system::system_error> e) {
+        std::optional<std::string> msg_optional = receive();
+        if (not msg_optional.has_value()) {
             logInfo("[ Error ] Connection Broken. Please connect to other server.");
             connectByInput(false);
         }
+        msg = msg_optional.value();
 
         logInfo(msg);
     }
+}
+
+int Client::send(std::string msg) {
+    std::size_t length = msg.size();
+    char length_bytes[8] = {};
+    size2chars(length, length_bytes);
+
+    try {
+        boost::asio::write(*_ptr_socket, boost::asio::buffer(length_bytes, 8));
+    } catch (boost::wrapexcept<boost::system::system_error> e) {
+        return -1;
+    }
+
+    try {
+        boost::asio::write(*_ptr_socket, boost::asio::buffer(msg));
+    } catch (boost::wrapexcept<boost::system::system_error> e) {
+        return -1;
+    }
+    
+    return 0;
+}
+
+std::optional<std::string> Client::receive(void) {
+    std::string msg{};
+    char length_bytes[8] = {};
+    std::size_t length = 0;
+
+    try {
+        boost::asio::read(*_ptr_socket, boost::asio::buffer(length_bytes, 8));
+    } catch (boost::wrapexcept<boost::system::system_error> e) {
+        return std::nullopt;
+    }
+
+    length = chars2size(length_bytes);
+
+    msg.resize(length);
+    
+    try {
+        boost::asio::read(*_ptr_socket, boost::asio::buffer(msg, msg.size()));
+    } catch (boost::wrapexcept<boost::system::system_error> e) {
+        return std::nullopt;
+    }
+
+    return std::optional<std::string>(msg);
 }
 
 void Client::connectByInput(bool isFirstConnect) {

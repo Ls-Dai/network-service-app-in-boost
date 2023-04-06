@@ -19,6 +19,22 @@ std::string input(std::string const& s, std::string endline="\n") {
     return ret;
 }
 
+char *size2chars(std::size_t i, char s[8]) {
+    for (int j = 7; j > -1; j--) {
+        s[j] = i & 0b1111;
+        i >>= 4;
+    }
+    return s;
+}
+
+std::size_t chars2size(char s[8]) {
+    std::size_t i = 0;
+    for (int j = 7; j > -1; j--) {
+        i += s[j] << ((7 - j) * 4);
+    }
+    return i;
+}
+
 const double NANO = 1000000000.0;
 const double MICRO = 1000000.0;
 const double Milli = 1000.0;
