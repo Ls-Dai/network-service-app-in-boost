@@ -1,5 +1,5 @@
-#ifndef _SERVER_H_
-#define _SERVER_H_
+#ifndef _SERVER_HPP_
+#define _SERVER_HPP_
 
 #ifndef _STD_CPP_
 #define _STD_CPP_
@@ -107,7 +107,7 @@ std::optional<std::string> Server::receive(void) {
     msg.resize(length);
     
     try {
-        boost::asio::read(*_ptr_socket, boost::asio::buffer(msg, msg.size()));
+        boost::asio::read(*_ptr_socket, boost::asio::buffer(msg));
     } catch (boost::wrapexcept<boost::system::system_error> e) {
         return std::nullopt;
     }

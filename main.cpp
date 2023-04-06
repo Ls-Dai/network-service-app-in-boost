@@ -3,8 +3,8 @@
 #include <bits/stdc++.h>
 #endif
 
-#include "client.h"
-#include "server.h"
+#include "client.hpp"
+#include "server.hpp"
 #include "utils.h"
 
 enum class Mode {

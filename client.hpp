@@ -1,5 +1,5 @@
-#ifndef _CLIENT_H_
-#define _CLIENT_H_
+#ifndef _CLIENT_HPP_
+#define _CLIENT_HPP_
 
 #ifndef _STD_CPP_
 #define _STD_CPP_
@@ -71,12 +71,14 @@ void Client::run() {
 
         std::optional<std::string> msg_optional = receive();
         if (not msg_optional.has_value()) {
-            logInfo("[ Error ] Connection Broken. Please connect to other server.");
+            logInfo("[ Error ] Connection Broken. Please connect to another server.");
             connectByInput(false);
         }
-        msg = msg_optional.value();
 
-        logInfo(msg);
+        if (msg_optional.has_value()) {
+            msg = msg_optional.value_or("None");
+            logInfo(msg);
+        }
     }
 }
 
@@ -116,7 +118,7 @@ std::optional<std::string> Client::receive(void) {
     msg.resize(length);
     
     try {
-        boost::asio::read(*_ptr_socket, boost::asio::buffer(msg, msg.size()));
+        boost::asio::read(*_ptr_socket, boost::asio::buffer(msg));
     } catch (boost::wrapexcept<boost::system::system_error> e) {
         return std::nullopt;
     }
@@ -125,6 +127,7 @@ std::optional<std::string> Client::receive(void) {
 }
 
 void Client::connectByInput(bool isFirstConnect) {
+beginning:
     if (not isFirstConnect) 
         _ptr_socket->close();
 
@@ -141,7 +144,14 @@ void Client::connectByInput(bool isFirstConnect) {
     if (port_str.empty())
         port_str = "8080";
 
-    this->connect(ipAddr, std::atoi(port_str.c_str()));
+    try {
+        this->connect(ipAddr, std::atoi(port_str.c_str()));
+        logInfo("[ Info ] Connection built.");
+    } catch (boost::wrapexcept<boost::system::system_error> e) {
+        logInfo(std::string("[ Error ] ") + e.what());
+        logInfo("[ Info ] Please re-enter following infos");
+        goto beginning;
+    }
 }
 
 #endif
