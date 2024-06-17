@@ -1,11 +1,7 @@
-#ifndef _STD_CPP_
-#define _STD_CPP_
-#include <bits/stdc++.h>
-#endif
-
 #include "client.hpp"
 #include "server.hpp"
 #include "utils.h"
+
 
 enum class Mode {
     null,

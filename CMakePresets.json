@@ -1,0 +1,17 @@
+{
+    "version": 4,
+    "configurePresets": [
+        {
+            "name": "devel",
+            "binaryDir": "${sourceDir}/.out",
+            "installDir": "${sourceDir}/.install"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "devel",
+            "configurePreset": "devel",
+            "jobs": 1
+        }
+    ]
+}

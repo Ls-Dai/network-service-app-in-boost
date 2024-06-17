@@ -1,11 +1,6 @@
 #ifndef _CLIENT_HPP_
 #define _CLIENT_HPP_
 
-#ifndef _STD_CPP_
-#define _STD_CPP_
-#include <bits/stdc++.h>
-#endif
-
 #include <optional>
 #include <boost/asio.hpp>
 #include "utils.h"

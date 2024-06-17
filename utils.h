@@ -1,6 +1,20 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
+#if defined(__linux__) || defined(__GNUG__)
+    #include <bits/stdc++.h>
+#elif defined(__APPLE__)
+    #include <iostream>
+    #include <vector>
+    #include <boost>
+    #include <string>
+#else
+    #include <iostream>
+    #include <vector>
+    #include <boost>
+    #include <string>
+#endif
+
 #ifndef _STD_CPP_
 #define _STD_CPP_
 #include <bits/stdc++.h>
